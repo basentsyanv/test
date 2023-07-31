@@ -8,13 +8,13 @@
   "license": "MIT",
   "type": "commonjs",
   "scripts": {
-    "test:unit": "DB_HOST=127.0.0.1 jest --testPathPattern=tests/unit",
+    "test:unit": "jest --testPathPattern=tests/unit",
     "test:integration": "jest  --testPathPattern=tests/api",
     "lint": "eslint '*.ts' --quiet --fix",
     "compile": "tsc -p tsconfig.json",
     "test": "npm run compile && npm run test:unit && npm run test:integration",
     "requestToLambda": "ts-node requestToLambda.ts",
-    "app": "DB_HOST=127.0.0.1 ts-node lambda.ts",
+    "app": "DB_HOST=127.0.0.1 ts-node app.ts",
     "single:test": "DB_HOST=127.0.0.1 jest tests/unit/test-savePricesToDatabase.test.ts"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { lambdaHandler } from '../../lambda';
+import { lambdaHandler } from '../../app';
 import { expect, describe, it } from '@jest/globals';
 import { fetchAndStorePrices } from '../../fetchAndStorePrices';
 
