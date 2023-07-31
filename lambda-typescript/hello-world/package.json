@@ -14,7 +14,7 @@
     "compile": "tsc -p tsconfig.json",
     "test": "npm run compile && npm run test:unit && npm run test:integration",
     "requestToLambda": "ts-node requestToLambda.ts",
-    "app": "DB_HOST=127.0.0.1 ts-node app.ts",
+    "app": "DB_HOST=127.0.0.1 ts-node lambda.ts",
     "single:test": "DB_HOST=127.0.0.1 jest tests/unit/test-savePricesToDatabase.test.ts"
   },
   "dependencies": {
