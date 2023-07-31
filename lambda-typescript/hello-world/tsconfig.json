@@ -12,7 +12,7 @@
       "module": "CommonJS",
       // "module": "ESNext",
       "outDir": "./dist",
-      "types": ["node"]
+      "types": ["node", "jest"]
     },
     "exclude": ["**/*.test.ts"]
   }

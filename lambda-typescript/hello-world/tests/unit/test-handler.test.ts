@@ -1,37 +1,64 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { lambdaHandler } from '../../app';
-import { expect, describe, it } from '@jest/globals';
+import { lambdaHandler, fetchAndStorePrices, savePricesToDatabase, BINANCE_API_BASE_URL } from '../../app'; // adjust the path
+import { ConnectionType } from '../../helpers'; 
 
-describe('Unit test for app handler', function () {
-    it('verifies successful response', async () => {
+import { APIGatewayProxyEvent } from 'aws-lambda';
+import axios from 'axios';
+import { createConnect } from '../../helpers';
+import { describe, it, jest, expect } from '@jest/globals';
+
+
+
+interface MockedConnection {
+    query: jest.Mock;
+}
+
+
+jest.mock('axios');
+jest.mock('./helpers');
+
+
+const mockQuery = jest.fn((sql: string) => Promise.resolve({})) as jest.MockedFunction<ConnectionType['query']>;
+
+
+jest.mock('./helpers', () => {
+    const mockConnection = {
+        query: (sql: string) => Promise.resolve({})
+    };
+    return {
+        createConnect: Promise.resolve(mockConnection)
+    };
+});
+
+describe('Unit tests for Lambda handler', () => {
+    it('should return 200 status and correct body', async () => {
+        (axios.get as jest.MockedFunction<typeof axios.get>).mockResolvedValueOnce({
+            data: {
+                price: "30000"
+            }
+        });
+
         const event: APIGatewayProxyEvent = {
-            httpMethod: 'get',
+            httpMethod: 'GET',
             body: '',
             headers: {},
-            isBase64Encoded: false,
             multiValueHeaders: {},
-            multiValueQueryStringParameters: {},
-            path: '/hello',
+            isBase64Encoded: false,
+            path: '/',
             pathParameters: {},
             queryStringParameters: {},
+            multiValueQueryStringParameters: {},
+            stageVariables: {},
             requestContext: {
-                accountId: '123456789012',
-                apiId: '1234',
+                accountId: 'sampleAccountId',
+                apiId: 'sampleApiId',
                 authorizer: {},
-                httpMethod: 'get',
+                httpMethod: 'GET',
                 identity: {
                     accessKey: '',
                     accountId: '',
                     apiKey: '',
                     apiKeyId: '',
                     caller: '',
-                    clientCert: {
-                        clientCertPem: '',
-                        issuerDN: '',
-                        serialNumber: '',
-                        subjectDN: '',
-                        validity: { notAfter: '', notBefore: '' },
-                    },
                     cognitoAuthenticationProvider: '',
                     cognitoAuthenticationType: '',
                     cognitoIdentityId: '',
@@ -41,25 +68,46 @@ describe('Unit test for app handler', function () {
                     user: '',
                     userAgent: '',
                     userArn: '',
+                    clientCert: null as any,
                 },
-                path: '/hello',
+                path: '/',
                 protocol: 'HTTP/1.1',
-                requestId: 'c6af9ac6-7b61-11e6-9a41-93e8deadbeef',
-                requestTimeEpoch: 1428582896000,
-                resourceId: '123456',
-                resourcePath: '/hello',
+                requestId: 'sampleRequestId',
+                requestTimeEpoch: 123456789,
+                resourceId: 'sampleResourceId',
+                resourcePath: '/',
                 stage: 'dev',
             },
-            resource: '',
-            stageVariables: {},
+            resource: '/'
         };
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
 
+        const result = await lambdaHandler(event);
         expect(result.statusCode).toEqual(200);
-        expect(result.body).toEqual(
-            JSON.stringify({
-                message: 'hello world',
-            }),
-        );
+    });
+
+    it('should fetch and store prices successfully', async () => {
+        (axios.get as jest.MockedFunction<typeof axios.get>).mockResolvedValueOnce({
+            data: {
+                price: "30000"
+            }
+        });
+
+        const result = await fetchAndStorePrices();
+        expect(result.statusCode).toEqual(200);
+        expect(JSON.parse(result.body)).toHaveProperty('BTCUSDT');
+    });
+
+    it('should save prices to the database', async () => {
+        const prices = {
+            BTCUSDT: 30000,
+            ETHUSDT: 2500,
+            LTCUSDT: 150
+        };
+
+        mockQuery.mockResolvedValueOnce({}); // mock for CREATE TABLE query
+        mockQuery.mockResolvedValueOnce({}); // mock for INSERT query
+
+        await savePricesToDatabase(prices);
+        expect(mockQuery).toHaveBeenCalledTimes(2);
     });
 });
