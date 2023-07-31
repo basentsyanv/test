@@ -7,15 +7,15 @@ const dbConfig = {
     database: process.env.DB_NAME || 'platform_windows_19usljs',
 };
 
-export const pool = createPool(dbConfig)
-
+let pool
 
 export const connect = async () => {
+    pool = createPool(dbConfig)
     return pool.getConnection();
 }
 
 export const closeConnection = async () => {
-    await (await connect()).release();
+    await pool.end();
 };
 
 
