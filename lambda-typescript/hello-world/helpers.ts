@@ -1,4 +1,4 @@
-import { createConnection } from 'mysql2/promise';
+import { createPool } from 'mysql2/promise';
 
 const dbConfig = {
     host: process.env.DB_HOST || 'host.docker.internal',
@@ -7,30 +7,16 @@ const dbConfig = {
     database: process.env.DB_NAME || 'platform_windows_19usljs',
 };
 
-export const createConnect = createConnection(dbConfig);
+export const pool = createPool(dbConfig)
+
+
+export const connect = async () => {
+    return pool.getConnection();
+}
 
 export const closeConnection = async () => {
-    await (await createConnect).end();
+    await (await connect()).release();
 };
 
-// export async function getPricesFromDatabase(): Promise<Record<string, number> | null> {
-//     const prices: Record<string, number> = {};
-//     const connection = await createConnect;
-//     try {
-//         const [results]: any = await connection.execute('SELECT symbol, price FROM prices');
-//         results.forEach((row: any) => {
-//             prices[row.symbol] = row.price;
-//         });
-
-//         console.log('results============', results);
-//         console.log('prices===========', prices);
-
-//         // await connection.end();
-//         return results;
-//     } catch (error) {
-//         console.log('Error fetching prices from database:', error);
-//         return null;
-//     }
-// }
 
 

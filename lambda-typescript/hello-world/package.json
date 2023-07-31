@@ -12,7 +12,7 @@
     "lint": "eslint '*.ts' --quiet --fix",
     "compile": "tsc -p tsconfig.json",
     "test": "npm run compile && npm run unit",
-    "asd": "ts-node app.ts",
+    "requestToLambda": "ts-node requestToLambda.ts",
     "server": "node ./dist/app.js"
   },
   "dependencies": {

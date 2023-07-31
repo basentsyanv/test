@@ -1,24 +1,18 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import axios from 'axios';
 
-// /**
-//  *
-//  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-//  * @param {Object} event - API Gateway Lambda Proxy Input Format
-//  *
-//  * Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-//  * @returns {Object} object - API Gateway Lambda Proxy Output Format
-//  *
-//  */
-// import axios from 'axios';
-// export const BINANCE_API_BASE_URL = 'https://api.binance.com/api/v3/ticker/price';
-// const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'LTCUSDT'];
+import { closeConnection, connect, createConnect } from './helpers';
+
+export const BINANCE_API_BASE_URL = 'https://api.binance.com/api/v3/ticker/price';
+const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'LTCUSDT'];
+
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<any> => {
     try {
-        console.log("aaa====================", event)
+        console.log("aaa====================", event.body)
         const fetched = await fetchAndStorePrices();
-        const response = await axios.get(`${BINANCE_API_BASE_URL}?symbol=${SYMBOLS[1]}`);
-        console.log('responese--============', response.status, response.data);
+        // const response = await axios.get(`${BINANCE_API_BASE_URL}?symbol=${SYMBOLS[1]}`);
+        // console.log('responese--============', response.status, response.data);
         console.log('fetched--============', fetched);
 
         return {
@@ -36,12 +30,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<any> =
     }
 };
 
-import axios from 'axios';
 
-import { closeConnection, createConnect } from './helpers';
-
-export const BINANCE_API_BASE_URL = 'https://api.binance.com/api/v3/ticker/price';
-const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'LTCUSDT'];
 
 export async function fetchAndStorePrices() {
     try {
@@ -52,10 +41,11 @@ export async function fetchAndStorePrices() {
                 prices[symbol] = parseFloat(response.data.price);
             }
         }
-        console.log('Fetched pricesАЯА:', prices);
+        console.log('Fetched prices:', prices);
 
         await savePricesToDatabase(prices);
-        await closeConnection();
+        await closeConnection()
+        // await closeConnection();
         return {
             statusCode: 200,
             body: JSON.stringify(prices),
@@ -70,8 +60,8 @@ export async function fetchAndStorePrices() {
 }
 
 async function savePricesToDatabase(prices: Record<string, number>): Promise<any> {
-    const connection = await createConnect;
-    
+    const connection = await connect();
+
     const insertValues = Object.keys(prices).map((symbol) => `('${symbol}', ${prices[symbol]})`);
     const createTable = `CREATE TABLE IF NOT EXISTS prices (
             symbol VARCHAR(50) NOT NULL,
@@ -86,7 +76,25 @@ async function savePricesToDatabase(prices: Record<string, number>): Promise<any
     console.log('createTableResult=====:', createTableResult);
 
     console.log('insertQueryResult=====', insertQueryResult);
-    // await connection.end(); 
+    // await connection.end();
 }
 
-fetchAndStorePrices()
+// export async function getPricesFromDatabase(): Promise<Record<string, number> | null> {
+//     const prices: Record<string, number> = {};
+//     const connection = await createConnect;
+//     try {
+//         const [results]: any = await connection.execute('SELECT symbol, price FROM prices');
+//         results.forEach((row: any) => {
+//             prices[row.symbol] = row.price;
+//         });
+
+//         console.log('results============', results);
+//         console.log('prices===========', prices);
+
+//         // await connection.end();
+//         return results;
+//     } catch (error) {
+//         console.log('Error fetching prices from database:', error);
+//         return null;
+//     }
+// }
