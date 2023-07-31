@@ -1,24 +1,15 @@
-// /*
-//  * For a detailed explanation regarding each configuration property and type check, visit:
-//  * https://jestjs.io/docs/configuration
-//  */
+/*
+ * For a detailed explanation regarding each configuration property and type check, visit:
+ * https://jestjs.io/docs/configuration
+ */
 
-// export default {
-//     transform: {
-//         '^.+\\.ts?$': 'ts-jest',
-//     },
-//     clearMocks: true,
-//     collectCoverage: true,
-//     coverageDirectory: 'coverage',
-//     coverageProvider: 'v8',
-//     testMatch: ['**/tests/unit/**/*test.ts']
-// };
-module.exports = {
-    roots: ['<rootDir>'],
+export default {
     transform: {
-      '^.+\\.tsx?$': 'ts-jest',
+        '^.+\\.ts?$': 'ts-jest',
     },
-    testRegex: '(/tests/.*|(\\.|/)(test|spec))\\.tsx?$',
-    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  };
-  
+    clearMocks: true,
+    collectCoverage: true,
+    coverageDirectory: 'coverage',
+    coverageProvider: 'v8',
+    testMatch: ['**/tests/unit/*.test.ts'],
+};
